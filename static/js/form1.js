@@ -8,11 +8,7 @@ window.addEventListener('submit', (event) => {
 
     event.preventDefault();
 
-    const data = new FormData(event.target);
-
-    console.log(event)
-
-    const isvc_name = data.get('isvc_name');
+    const isvc_name = document.getElementById('isvc').value
 
     console.log(isvc_name)
 
