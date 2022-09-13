@@ -9,6 +9,7 @@ window.addEventListener('submit', (event) => {
     event.preventDefault();
 
     const isvc_name = document.getElementById('isvc').value
+    const isvc_type = document.getElementById('isvc_type').value
 
     console.log(isvc_name)
 
@@ -21,7 +22,7 @@ window.addEventListener('submit', (event) => {
         type: "POST",
         dataType:"json",
         contentType: "application/json",
-        data: JSON.stringify({isvcname: isvc_name}),
+        data: JSON.stringify({isvcname: isvc_name, isvctype: isvc_type}),
         success: function (data) {
             console.log('${data}');
             M.toast({html: data.message});

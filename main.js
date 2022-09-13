@@ -1,7 +1,7 @@
 var k8s = require('@kubernetes/client-node');
 var kc = new k8s.KubeConfig();
-kc.loadFromDefault();
-//kc.loadFromCluster();
+//kc.loadFromDefault();
+kc.loadFromCluster();
 var k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sCustomClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
@@ -35,6 +35,9 @@ app.post('/delete_isvc', function (req, res) {
 app.post('/create_pod', function (req, res) {
 
   //req.get("email")
+  //console.log(req.body.isvctype)
+
+  // TODO use case isvctype
   var body = {
       "apiVersion": "serving.kserve.io/v1beta1",
       "kind": "InferenceService",
@@ -43,7 +46,7 @@ app.post('/create_pod', function (req, res) {
       },
       "spec": {
           "predictor": {
-            "sklearn": {
+            [req.body.isvctype]: {
               "protocolVersion": "v2",
               "storageUri": "gs://seldon-models/sklearn/mms/lr_model"
             }
