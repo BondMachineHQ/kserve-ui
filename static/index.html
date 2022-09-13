@@ -72,7 +72,6 @@
                   <select id="isvc_type">
                     <option value="" disabled selected>Choose your inference engine</option>
                     <option value="sklearn">SKLearn</option>
-                    <option value="tensorflow">TensorFlow</option>
                     <option value="xgboost">XGBoost</option>
                   </select>
                   <label>Engine Select</label>
@@ -81,6 +80,12 @@
                   <input placeholder="Placeholder" id="isvc" type="text" >
                   <label for="isvc">Inference service name</label>
                 </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s8 right">
+                <input placeholder="gs://seldon-models/sklearn/mms/lr_model" id="url" type="url" >
+                <label for="isvc">Inference model URL</label>
+              </div>
             </div>
             <div class="row">
               <button class="btn waves-effect waves-light" type="submit" >Submit

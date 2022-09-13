@@ -1,5 +1,6 @@
 var k8s = require('@kubernetes/client-node');
 var kc = new k8s.KubeConfig();
+//Uncomment only for TEST
 //kc.loadFromDefault();
 kc.loadFromCluster();
 var k8sApi = kc.makeApiClient(k8s.CoreV1Api);
@@ -48,7 +49,7 @@ app.post('/create_pod', function (req, res) {
           "predictor": {
             [req.body.isvctype]: {
               "protocolVersion": "v2",
-              "storageUri": "gs://seldon-models/sklearn/mms/lr_model"
+              "storageUri": req.body.url
             }
           }
       }
