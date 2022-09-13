@@ -1,3 +1,4 @@
+![](./img/homepage.png)
 ## Dev environment with skaffold
 
 ```bash
