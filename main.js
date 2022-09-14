@@ -38,22 +38,45 @@ app.post('/create_pod', function (req, res) {
   //req.get("email")
   //console.log(req.body.isvctype)
 
-  // TODO use case isvctype
-  var body = {
-      "apiVersion": "serving.kserve.io/v1beta1",
-      "kind": "InferenceService",
-      "metadata": {
-          "name": req.body.isvcname,
-      },
-      "spec": {
-          "predictor": {
-            [req.body.isvctype]: {
-              "protocolVersion": "v2",
-              "storageUri": req.body.url
+  switch (req.body.isvctype) {
+    case xgboost:
+    case sklearn:
+      var body = {
+        "apiVersion": "serving.kserve.io/v1beta1",
+        "kind": "InferenceService",
+        "metadata": {
+            "name": req.body.isvcname,
+        },
+        "spec": {
+            "predictor": {
+              [req.body.isvctype]: {
+                "protocolVersion": "v2",
+                "storageUri": req.body.url
+              }
             }
-          }
+        }
+      }
+      break;
+    case onnx:
+    case tensorflow:
+      var body = {
+        "apiVersion": "serving.kserve.io/v1beta1",
+        "kind": "InferenceService",
+        "metadata": {
+            "name": req.body.isvcname,
+        },
+        "spec": {
+            "predictor": {
+              [req.body.isvctype]: {
+                "protocolVersion": "v1",
+                "storageUri": req.body.url
+              }
+            }
+        }
       }
   }
+  // TODO use case isvctype
+
   
   k8sCustomClient.createNamespacedCustomObject('serving.kserve.io','v1beta1','default', "inferenceservices",body)
       .then((result)=>{
