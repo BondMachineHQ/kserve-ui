@@ -1,8 +1,8 @@
 var k8s = require('@kubernetes/client-node');
 var kc = new k8s.KubeConfig();
 //Uncomment only for TEST
-//kc.loadFromDefault();
-kc.loadFromCluster();
+kc.loadFromDefault();
+//kc.loadFromCluster();
 var k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sCustomClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
@@ -39,8 +39,8 @@ app.post('/create_pod', function (req, res) {
   //console.log(req.body.isvctype)
 
   switch (req.body.isvctype) {
-    case xgboost:
-    case sklearn:
+    case "xgboost":
+    case "sklearn":
       var body = {
         "apiVersion": "serving.kserve.io/v1beta1",
         "kind": "InferenceService",
@@ -57,8 +57,8 @@ app.post('/create_pod', function (req, res) {
         }
       }
       break;
-    case onnx:
-    case tensorflow:
+    case "onnx":
+    case "tensorflow":
       var body = {
         "apiVersion": "serving.kserve.io/v1beta1",
         "kind": "InferenceService",
