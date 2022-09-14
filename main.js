@@ -1,8 +1,8 @@
 var k8s = require('@kubernetes/client-node');
 var kc = new k8s.KubeConfig();
 //Uncomment only for TEST
-kc.loadFromDefault();
-//kc.loadFromCluster();
+//kc.loadFromDefault();
+kc.loadFromCluster();
 var k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 const k8sCustomClient = kc.makeApiClient(k8s.CustomObjectsApi);
 
