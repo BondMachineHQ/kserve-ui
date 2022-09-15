@@ -72,8 +72,9 @@ app.post('/create_pod', function (req, res) {
                 "storageUri": req.body.url
               }
             }
-        }
+          }
       }
+      break;
   }
   // TODO use case isvctype
 

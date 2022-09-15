@@ -124,8 +124,11 @@
         <table id="example" class="display highlight responsive-table blue-text" style="width:100%">
             <thead>
                 <tr>
+                    <th>SERVICE_TYPE</th>
+                    <th>API_VERSION</th>
                     <th>INFERENCE_SERVICE_NAME</th>
                     <th>SERVICE_HOSTNAME</th>
+                    <th>MODEL URL</th>
                     <th>   </th>
                 </tr>
             </thead>
@@ -138,7 +141,7 @@
           <h5>Test them with a curl command</h5>
         </div>
           <div class="card-content blue-text darken-2">
-            <p><i>curl -H "Host: ${SERVICE_HOSTNAME}" -k http://131.154.96.201:31080/v1/models/${INFERENCE_SERVICE_NAME}:predict -d @./my-input.json</i></p>
+            <p><i>curl -H "Host: ${SERVICE_HOSTNAME}" -k http://131.154.96.201:31080/${API_VERSION}/models/${INFERENCE_SERVICE_NAME}:predict -d @./my-input.json</i></p>
           </div>
           <div class="card-action">
             <a href="https://kserve.github.io/website/0.9/modelserving/v1beta1/serving_runtime/">KServe documentation</a>

@@ -6,10 +6,13 @@ var table = $('#example').DataTable({
         dataSrc: 'items'
     },
     columns: [
+      { data: 'spec.predictor.model.modelFormat.name'},
+      { data: 'spec.predictor.model.protocolVersion'},
       { data: 'metadata.name'},
       { data: 'status.url',
         defaultContent: "<i>Not available yet</i>"
-      }
+      },
+      { data: 'spec.predictor.model.storageUri'}
     ],
     columnDefs: [
             {
