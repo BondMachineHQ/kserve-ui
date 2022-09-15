@@ -16,7 +16,7 @@ var table = $('#example').DataTable({
     ],
     columnDefs: [
             {
-                targets: 2,
+                targets: 5,
                 data: null,
                 defaultContent: '<button type="delete" class="btn waves-effect waves-light" >Delete<i class="material-icons right">delete</i></button>',
             },
