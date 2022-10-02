@@ -39,6 +39,24 @@ app.post('/create_pod', function (req, res) {
   //console.log(req.body.isvctype)
 
   switch (req.body.isvctype) {
+    case "onnx":
+      var body = {
+        "apiVersion": "serving.kserve.io/v1beta1",
+        "kind": "InferenceService",
+        "metadata": {
+            "name": req.body.isvcname,
+        },
+        "spec": {
+            "predictor": {
+              [req.body.isvctype]: {
+                "protocolVersion": "v2",
+                "storageUri": req.body.url,
+                "args": ["--strict-model-config=false"]
+              }
+            }
+        }
+      }
+      break;
     case "xgboost":
     case "sklearn":
       var body = {
@@ -51,13 +69,12 @@ app.post('/create_pod', function (req, res) {
             "predictor": {
               [req.body.isvctype]: {
                 "protocolVersion": "v2",
-                "storageUri": req.body.url
+                "storageUri": req.body.url,
               }
             }
         }
       }
       break;
-    case "onnx":
     case "tensorflow":
       var body = {
         "apiVersion": "serving.kserve.io/v1beta1",

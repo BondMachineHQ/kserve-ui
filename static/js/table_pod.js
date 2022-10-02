@@ -7,12 +7,24 @@ var table = $('#example').DataTable({
     },
     columns: [
       { data: 'spec.predictor.model.modelFormat.name'},
-      { data: 'spec.predictor.model.protocolVersion'},
+      { data: 'spec.predictor.model.protocolVersion',
+        defaultContent: "<i>Not available</i>"
+      },
       { data: 'metadata.name'},
       { data: 'status.url',
-        defaultContent: "<i>Not available yet</i>"
+        defaultContent: "<i>Not available yet</i>",
+        render: function ( data, type, row) {
+          if (typeof data !== 'undefined') {
+            return data.replace(/^http?:\/\//, '');
+          }
+          return "<i>Not available yet</i>";
+        }
       },
-      { data: 'spec.predictor.model.storageUri'}
+      { data: 'spec.predictor.model.storageUri',
+        render: function ( data, type, row) {
+          return '<a href="'+data+'">'+data+'</a>';
+        }
+      }
     ],
     columnDefs: [
             {
