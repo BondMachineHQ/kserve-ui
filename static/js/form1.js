@@ -19,7 +19,7 @@ window.addEventListener('submit', (event) => {
     $.ajax({
   
         // Our sample url to make request 
-        url: "/create_pod",
+        url: "/create_isvc",
         type: "POST",
         dataType:"json",
         contentType: "application/json",

@@ -2,7 +2,7 @@ var table = $('#example').DataTable({
     serverSide: false,
     lengthChange: false,
     ajax: {
-        url: "/list_pods",
+        url: "/list_isvc",
         dataSrc: 'items'
     },
     columns: [
