@@ -11,6 +11,11 @@ import (
 var static embed.FS
 
 // TODO: implement list_isvc
+// var r = k8sCustomClient.listNamespacedCustomObject('serving.kserve.io','v1beta1','default', "inferenceservices")
+// .then(result => res.status(200).json(result.body))
+// .catch(err => res.status(500).send(err));
+
+// TODO: implement delete_isvc
 
 // TODO: implement create_isvc
 
