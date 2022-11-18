@@ -2,15 +2,15 @@ var table = $('#example').DataTable({
     serverSide: false,
     lengthChange: false,
     ajax: {
-        url: "/list_pods",
-        dataSrc: 'items'
+        url: "/list_isvc",
+        dataSrc: 'Items'
     },
     columns: [
-      { data: 'spec.predictor.model.modelFormat.name'},
-      { data: 'spec.predictor.model.protocolVersion',
+      { data: 'modelName'},
+      { data: 'protocolVersion',
         defaultContent: "<i>Not available</i>"
       },
-      { data: 'metadata.name'},
+      { data: 'name'},
       { data: 'status.url',
         defaultContent: "<i>Not available yet</i>",
         render: function ( data, type, row) {
@@ -20,7 +20,7 @@ var table = $('#example').DataTable({
           return "<i>Not available yet</i>";
         }
       },
-      { data: 'spec.predictor.model.storageUri',
+      { data: 'storageUri',
         render: function ( data, type, row) {
           return '<a href="'+data+'">'+data+'</a>';
         }
@@ -41,7 +41,6 @@ $('#refresh_button').click(function refreshData() {
 
 $('#example tbody').on('click', 'button', function () {
     var data = table.row($(this).parents('tr')).data();
-    //alert("Deleting " + data.metadata.name);
     $.ajax({
   
         // Our sample url to make request 
@@ -49,7 +48,7 @@ $('#example tbody').on('click', 'button', function () {
         type: "POST",
         dataType:"json",
         contentType: "application/json",
-        data: JSON.stringify({isvcname: data.metadata.name}),
+        data: JSON.stringify({isvcname: data.name}),
         success: function (data) {
             M.toast({html: data.message});
         },
@@ -65,5 +64,5 @@ $('#example tbody').on('click', 'button', function () {
             table.ajax.reload();
          }, 5000)
     );
-    alert(data.metadata.name + "has been deleted!")
+    alert(data.name + "has been deleted!")
 });

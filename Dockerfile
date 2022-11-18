@@ -1,9 +1,14 @@
-FROM node:18-alpine3.15
+FROM golang:1.19.3-buster
 
-COPY . /opt/app
+RUN apt update \
+&& apt install -y git
 
-WORKDIR /opt/app
+COPY . /kserve
+WORKDIR /kserve
+#RUN GOOS=darwin GOARCH=arm64 go build -mod vendor -o main ./main.go
+RUN go build -mod vendor -o main ./main.go
 
-RUN npm install
+FROM alpine
 
-ENTRYPOINT ["node", "main.js"]
+COPY --from=0 /kserve/main /kserve/main
+CMD ["/kserve/main"]
