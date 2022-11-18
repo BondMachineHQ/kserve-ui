@@ -33,11 +33,6 @@ jobs:
           context: ./
           outputs: "type=registry,push=true"
           tags: |
-            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-bond-server/bond-server:${{ env.RELEASE_VERSION }}
-            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-bond-server:${{ env.RELEASE_VERSION }}
-            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/bond-server:${{ env.RELEASE_VERSION }}
-            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-bond-server/bond-server:latest
-            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-bond-server:latest
-            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/bond-server:latest
+            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-ui:latest
           file: ./Dockerfile
           platforms: linux/amd64
