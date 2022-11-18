@@ -45,7 +45,7 @@ release:
   # If set to true, will not auto-publish the release.
   # Available only for GitHub and Gitea.
   # Default is false.
-  draft: true
+  draft: false
 
   # Whether to remove existing draft releases with the same name before creating
   # a new one.
@@ -114,7 +114,7 @@ release:
   # URL, for instance, homebrew taps.
   #
   # Defaults to false.
-  disable: true
+  disable: false
 
   # Set this to true if you want to disable just the artifact upload to the SCM.
   # If this is true, GoReleaser will still create the release with the
