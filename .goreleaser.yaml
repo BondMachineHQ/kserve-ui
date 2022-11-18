@@ -18,6 +18,8 @@ archives:
       windows: Windows
       386: i386
       amd64: x86_64
+sboms:
+  - artifacts: archive
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -36,11 +38,6 @@ release:
   github:
     owner: dodas-ts
     name: kserve-ui
-
-  # IDs of the archives to use.
-  # Defaults to all.
-  ids:
-    - all
 
   # If set to true, will not auto-publish the release.
   # Available only for GitHub and Gitea.
