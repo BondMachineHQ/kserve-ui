@@ -6,7 +6,5 @@ RUN apt update \
 RUN git clone https://github.com/kserve/kserve.git /kserve
 COPY . /kserve
 WORKDIR /kserve
-RUN go mod download
-RUN go mod vendor
-RUN GOOS=darwin GOARCH=arm64 go build -o main ./main.go
+RUN GOOS=darwin GOARCH=arm64 go build -mod vendor -o main ./main.go
 CMD ["/kserve/main"]
