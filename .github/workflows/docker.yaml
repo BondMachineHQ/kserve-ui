@@ -39,5 +39,5 @@ jobs:
             ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-bond-server/bond-server:latest
             ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-bond-server:latest
             ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/bond-server:latest
-          file: ./kserve-predictor/Dockerfile
+          file: ./Dockerfile
           platforms: linux/amd64
