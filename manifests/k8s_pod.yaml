@@ -1,13 +1,23 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: kserveui
+  name: kserveui-deployment
   labels:
     app.kubernetes.io/name: kserveui
 spec:
-  containers:
-  - name: kserveui
-    image: dciangot/kserve-ui
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kserveui
+  template:
+    metadata:
+      name: kserveui
+      labels:
+        app.kubernetes.io/name: kserveui
+    spec:
+      containers:
+      - name: kserveui
+        image: ghcr.io/dodas-ts/kserve-ui:latest 
 ## TODO install oidc auth proxy
 
 ---
