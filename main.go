@@ -15,6 +15,7 @@ import (
 	kserveconstants "github.com/kserve/kserve/pkg/constants"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -224,8 +225,15 @@ func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Contex
 }
 
 func main() {
-	kubeconfig := "config/config_af_new"
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		kubeconfig := "config/config_af_new"
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	kserve_client, _ = servingv1beta1.NewForConfig(config)
 
 	content, _ := fs.Sub(static, "static")
