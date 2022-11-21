@@ -143,6 +143,38 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 				},
 			},
 		}
+
+	case "fpga-model":
+		version := "v0.0.1-pre1"
+		protocol := kserveconstants.ProtocolV1
+		svc = kserveapi.InferenceService{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "serving.kserve.io/v1beta1",
+				Kind:       "InferenceService",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: "default",
+			},
+			Spec: kserveapi.InferenceServiceSpec{
+				Predictor: kserveapi.PredictorSpec{
+					Model: &kserveapi.ModelSpec{
+						ModelFormat: kserveapi.ModelFormat{
+							Name:    "BondMachine",
+							Version: &version,
+						},
+						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
+							StorageURI:      &uri,
+							ProtocolVersion: &protocol,
+							Container: v1.Container{
+								Name:  "kserve-container",
+								Image: "ghcr.io/bondmachinehq/bond-server:v0.0.1-pre1",
+							},
+						},
+					},
+				},
+			},
+		}
 	}
 
 	return &svc
@@ -153,12 +185,14 @@ func list_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context,
 
 	isvc_list_new := make([]PredictorStruct, len(isvc_list.Items))
 
+	log.Println(isvc_list)
+
 	for i := 0; i < len(isvc_list.Items); i++ {
 		isvc_list_new[i] = PredictorStruct{
 			ModelName:       isvc_list.Items[i].Spec.Predictor.Model.ModelFormat.Name,
 			ProtocolVersion: string(*isvc_list.Items[i].Spec.Predictor.Model.ProtocolVersion),
 			StorageUri:      *isvc_list.Items[i].Spec.Predictor.Model.StorageURI,
-			Name:            isvc_list.Items[i].Name,
+			Name:            isvc_list.Items[i].ObjectMeta.Name,
 		}
 	}
 
