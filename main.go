@@ -160,7 +160,7 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 				Predictor: kserveapi.PredictorSpec{
 					Model: &kserveapi.ModelSpec{
 						ModelFormat: kserveapi.ModelFormat{
-							Name:    "BondMachine",
+							Name:    "fpga-model",
 							Version: &version,
 						},
 						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
@@ -184,8 +184,6 @@ func list_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context,
 	isvc_list, err := client.InferenceServices(namespace).List(ctx, metav1.ListOptions{})
 
 	isvc_list_new := make([]PredictorStruct, len(isvc_list.Items))
-
-	log.Println(isvc_list)
 
 	for i := 0; i < len(isvc_list.Items); i++ {
 		isvc_list_new[i] = PredictorStruct{
