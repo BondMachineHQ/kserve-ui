@@ -33,6 +33,6 @@ jobs:
           context: ./
           outputs: "type=registry,push=true"
           tags: |
-            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-ui:latest
+            ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-ui:${{ env.RELEASE_VERSION }}
           file: ./Dockerfile
           platforms: linux/amd64
