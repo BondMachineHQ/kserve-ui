@@ -39,41 +39,7 @@ type formRequest struct {
 	Isvcname string
 }
 
-func list_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string) ([]byte, error) {
-	isvc_list, err := client.InferenceServices(namespace).List(ctx, metav1.ListOptions{})
-
-	isvc_list_new := make([]PredictorStruct, len(isvc_list.Items))
-
-	for i := 0; i < len(isvc_list.Items); i++ {
-		isvc_list_new[i] = PredictorStruct{
-			ModelName:       isvc_list.Items[i].Spec.Predictor.Model.ModelFormat.Name,
-			ProtocolVersion: string(*isvc_list.Items[i].Spec.Predictor.Model.ProtocolVersion),
-			StorageUri:      *isvc_list.Items[i].Spec.Predictor.Model.StorageURI,
-			Name:            isvc_list.Items[i].Name,
-		}
-	}
-
-	items := Items{
-		Items: isvc_list_new,
-	}
-	marshalled_isvclist, err := json.Marshal(items)
-
-	if err != nil {
-		return nil, err
-	}
-	return marshalled_isvclist, nil
-}
-
-func delete_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, name string) (string, error) {
-	err := client.InferenceServices(namespace).Delete(ctx, name, metav1.DeleteOptions{})
-
-	if err != nil {
-		return "{\"message\":\"Error deleting resource\"}", err
-	}
-	return "{\"message\":\"Successfully deleted resource\"}", nil
-}
-
-func create_isvc(ctx context.Context, isvcModel string, name string, uri string, client *servingv1beta1.ServingV1beta1Client, namespace string) (string, error) {
+func createSvcStruct(isvcModel string, name string, uri string, namespace string) *kserveapi.InferenceService {
 	var svc kserveapi.InferenceService
 	switch isvcModel {
 	case "onnx":
@@ -106,6 +72,29 @@ func create_isvc(ctx context.Context, isvcModel string, name string, uri string,
 		}
 
 	case "xgboost":
+		protocol := kserveconstants.ProtocolV2
+
+		svc = kserveapi.InferenceService{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "serving.kserve.io/v1beta1",
+				Kind:       "InferenceService",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: "default",
+			},
+			Spec: kserveapi.InferenceServiceSpec{
+				Predictor: kserveapi.PredictorSpec{
+					XGBoost: &kserveapi.XGBoostSpec{
+						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
+							ProtocolVersion: &protocol,
+							StorageURI:      &uri,
+						},
+					},
+				},
+			},
+		}
+
 	case "sklearn":
 
 		protocol := kserveconstants.ProtocolV2
@@ -154,9 +143,79 @@ func create_isvc(ctx context.Context, isvcModel string, name string, uri string,
 				},
 			},
 		}
+
+	case "fpga-model":
+		version := "v0.0.1-pre1"
+		protocol := kserveconstants.ProtocolV1
+		svc = kserveapi.InferenceService{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "serving.kserve.io/v1beta1",
+				Kind:       "InferenceService",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: "default",
+			},
+			Spec: kserveapi.InferenceServiceSpec{
+				Predictor: kserveapi.PredictorSpec{
+					Model: &kserveapi.ModelSpec{
+						ModelFormat: kserveapi.ModelFormat{
+							Name:    "fpga-model",
+							Version: &version,
+						},
+						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
+							StorageURI:      &uri,
+							ProtocolVersion: &protocol,
+							Container: v1.Container{
+								Name:  "kserve-container",
+								Image: "ghcr.io/bondmachinehq/bond-server:v0.0.1-pre1",
+							},
+						},
+					},
+				},
+			},
+		}
 	}
 
-	_, err := client.InferenceServices(namespace).Create(ctx, &svc, metav1.CreateOptions{})
+	return &svc
+}
+
+func list_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string) ([]byte, error) {
+	isvc_list, err := client.InferenceServices(namespace).List(ctx, metav1.ListOptions{})
+
+	isvc_list_new := make([]PredictorStruct, len(isvc_list.Items))
+
+	for i := 0; i < len(isvc_list.Items); i++ {
+		isvc_list_new[i] = PredictorStruct{
+			ModelName:       isvc_list.Items[i].Spec.Predictor.Model.ModelFormat.Name,
+			ProtocolVersion: string(*isvc_list.Items[i].Spec.Predictor.Model.ProtocolVersion),
+			StorageUri:      *isvc_list.Items[i].Spec.Predictor.Model.StorageURI,
+			Name:            isvc_list.Items[i].ObjectMeta.Name,
+		}
+	}
+
+	items := Items{
+		Items: isvc_list_new,
+	}
+	marshalled_isvclist, err := json.Marshal(items)
+
+	if err != nil {
+		return nil, err
+	}
+	return marshalled_isvclist, nil
+}
+
+func delete_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, name string) (string, error) {
+	err := client.InferenceServices(namespace).Delete(ctx, name, metav1.DeleteOptions{})
+
+	if err != nil {
+		return "{\"message\":\"Error deleting resource\"}", err
+	}
+	return "{\"message\":\"Successfully deleted resource\"}", nil
+}
+
+func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, svc *kserveapi.InferenceService) (string, error) {
+	_, err := client.InferenceServices(namespace).Create(ctx, svc, metav1.CreateOptions{})
 	if err != nil {
 		return "{\"message\":\"Error creating resource\"}", err
 	}
@@ -193,10 +252,11 @@ func create_isvc_handler(w http.ResponseWriter, r *http.Request) {
 	form := formRequest{}
 	json.Unmarshal(bodyBytes, &form)
 
-	model := form.Isvctype
-	storageUri := form.Url
-	name := form.Isvcname
-	out, err := create_isvc(ctx, model, name, storageUri, kserve_client, namespace)
+	svcModel := form.Isvctype
+	svcStorageUri := form.Url
+	svcName := form.Isvcname
+	svc := createSvcStruct(svcModel, svcName, svcStorageUri, namespace)
+	out, err := create_isvc(kserve_client, ctx, svc)
 	if err != nil {
 		log.Println(err)
 	}
