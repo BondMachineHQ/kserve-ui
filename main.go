@@ -17,6 +17,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -288,8 +289,15 @@ func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, n
 }
 
 func main() {
-	kubeconfig := "config/config_af_new"
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		kubeconfig := "config/config_af_new"
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+
 	kserve_client, _ = servingv1beta1.NewForConfig(config)
 
 	content, _ := fs.Sub(static, "static")
