@@ -188,8 +188,6 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 		}
 
 	case "fpga-model":
-		version := "v0.0.1-pre1"
-		protocol := kserveconstants.ProtocolV1
 		svc = kserveapi.InferenceService{
 			TypeMeta: metav1.TypeMeta{
 				APIVersion: "serving.kserve.io/v1beta1",
@@ -201,15 +199,9 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 			},
 			Spec: kserveapi.InferenceServiceSpec{
 				Predictor: kserveapi.PredictorSpec{
-					Model: &kserveapi.ModelSpec{
-						ModelFormat: kserveapi.ModelFormat{
-							Name:    "fpga-model",
-							Version: &version,
-						},
-						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
-							StorageURI:      &uri,
-							ProtocolVersion: &protocol,
-							Container: v1.Container{
+					PodSpec: kserveapi.PodSpec{
+						Containers: []v1.Container{
+							v1.Container{
 								Name:  "kserve-container",
 								Image: "ghcr.io/bondmachinehq/bond-server:v0.0.1-pre1",
 								Resources: v1.ResourceRequirements{
