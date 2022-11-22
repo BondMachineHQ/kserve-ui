@@ -242,7 +242,7 @@ func main() {
 	mutex.HandleFunc("/list_isvc", list_isvc_handler)
 	mutex.HandleFunc("/create_isvc", create_isvc_handler)
 	mutex.HandleFunc("/delete_isvc", delete_isvc_handler)
-	err = http.ListenAndServe(":3000", mutex)
+	err = http.ListenAndServe("0.0.0.0:3000", mutex)
 	if err != nil {
 		log.Fatal(err)
 	}
