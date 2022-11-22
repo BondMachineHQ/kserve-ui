@@ -14,6 +14,7 @@ import (
 	servingv1beta1 "github.com/kserve/kserve/pkg/client/clientset/versioned/typed/serving/v1beta1"
 	kserveconstants "github.com/kserve/kserve/pkg/constants"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -32,6 +33,17 @@ type PredictorStruct struct {
 	ModelName       string `json:"modelName"`
 	ProtocolVersion string `json:"protocolVersion"`
 	StorageUri      string `json:"storageUri"`
+}
+
+type predictionArgs struct {
+	Input Input `json:"input"`
+}
+
+type Input struct {
+	Name     string    `json:"name"`
+	Shape    []int     `json:"shape"`
+	Datatype string    `json:"datatype"`
+	Data     []float32 `json:"data"`
 }
 
 type formRequest struct {
@@ -65,6 +77,12 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 								Args: []string{
 									"--strict-model-config=false",
 								},
+								Resources: v1.ResourceRequirements{
+									Requests: v1.ResourceList{
+										v1.ResourceCPU:    resource.MustParse("1"),
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+									},
+								},
 							},
 						},
 					},
@@ -90,6 +108,14 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
 							ProtocolVersion: &protocol,
 							StorageURI:      &uri,
+							Container: v1.Container{
+								Resources: v1.ResourceRequirements{
+									Requests: v1.ResourceList{
+										v1.ResourceCPU:    resource.MustParse("1"),
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -115,6 +141,14 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
 							ProtocolVersion: &protocol,
 							StorageURI:      &uri,
+							Container: v1.Container{
+								Resources: v1.ResourceRequirements{
+									Requests: v1.ResourceList{
+										v1.ResourceCPU:    resource.MustParse("1"),
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -139,6 +173,14 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 						PredictorExtensionSpec: kserveapi.PredictorExtensionSpec{
 							ProtocolVersion: &protocol,
 							StorageURI:      &uri,
+							Container: v1.Container{
+								Resources: v1.ResourceRequirements{
+									Requests: v1.ResourceList{
+										v1.ResourceCPU:    resource.MustParse("1"),
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+									},
+								},
+							},
 						},
 					},
 				},
@@ -170,6 +212,12 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 							Container: v1.Container{
 								Name:  "kserve-container",
 								Image: "ghcr.io/bondmachinehq/bond-server:v0.0.1-pre1",
+								Resources: v1.ResourceRequirements{
+									Requests: v1.ResourceList{
+										v1.ResourceCPU:    resource.MustParse("1"),
+										v1.ResourceMemory: resource.MustParse("2Gi"),
+									},
+								},
 							},
 						},
 					},
@@ -215,7 +263,7 @@ func delete_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Contex
 	return "{\"message\":\"Successfully deleted resource\"}", nil
 }
 
-func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, svc *kserveapi.InferenceService) (string, error) {
+func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, svc *kserveapi.InferenceService) (string, error) {
 	_, err := client.InferenceServices(namespace).Create(ctx, svc, metav1.CreateOptions{})
 	if err != nil {
 		return "{\"message\":\"Error creating resource\"}", err
@@ -223,6 +271,21 @@ func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Contex
 
 	return "{\"message\":\"Successfully submitted\"}", err
 }
+
+// func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, model string) (err error, resp *http.Request) {
+// 	data := predictionArgs{
+// 		Input: Input{
+// 			Name:     "input_1",
+// 			Shape:    []int{1, 4},
+// 			Datatype: "FP32",
+// 			Data:     []float32{0.39886742, 0.76609776, -0.39003127, -0.58781728},
+// 		},
+// 	}
+// 	jsonData, err := json.Marshal(data)
+// 	resp, err = http.NewRequest("POST", "http//131.154.96.201:31080/v1/models/"+model+":predict", strings.NewReader(string(jsonData)))
+
+// 	return
+// }
 
 func main() {
 	config, err := rest.InClusterConfig()
@@ -242,7 +305,8 @@ func main() {
 	mutex.HandleFunc("/list_isvc", list_isvc_handler)
 	mutex.HandleFunc("/create_isvc", create_isvc_handler)
 	mutex.HandleFunc("/delete_isvc", delete_isvc_handler)
-	err = http.ListenAndServe("0.0.0.0:3000", mutex)
+	//mutex.HandleFunc("/preedict", predict_handler)
+	err = http.ListenAndServe(":3000", mutex)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -264,7 +328,7 @@ func create_isvc_handler(w http.ResponseWriter, r *http.Request) {
 	svcStorageUri := form.Url
 	svcName := form.Isvcname
 	svc := createSvcStruct(svcModel, svcName, svcStorageUri, namespace)
-	out, err := create_isvc(kserve_client, ctx, svc)
+	out, err := create_isvc(kserve_client, ctx, namespace, svc)
 	if err != nil {
 		log.Println(err)
 	}
@@ -286,3 +350,16 @@ func delete_isvc_handler(w http.ResponseWriter, r *http.Request) {
 
 	w.Write([]byte(out))
 }
+
+// func predict_handler(w http.ResponseWriter, r *http.Request) {
+// 	ctx := context.Background()
+// 	bodyBytes, _ := ioutil.ReadAll(r.Body)
+// 	form := formRequest{}
+// 	json.Unmarshal(bodyBytes, &form)
+// 	model := form.Isvctype
+// func predict_handler(w http.ResponseWriter, r *http.Request) {
+// 	ctx := context.Background()
+// 	bodyBytes, _ := ioutil.ReadAll(r.Body)
+// 	form := formRequest{}
+// 	json.Unmarshal(bodyBytes, &form)
+// 	model := form.Isvctype
