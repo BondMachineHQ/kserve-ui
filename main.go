@@ -357,6 +357,9 @@ func delete_isvc_handler(w http.ResponseWriter, r *http.Request) {
 // 	form := formRequest{}
 // 	json.Unmarshal(bodyBytes, &form)
 // 	model := form.Isvctype
-
-// 	predict(kserve_client, ctx, namespace, model)
-// }
+// func predict_handler(w http.ResponseWriter, r *http.Request) {
+// 	ctx := context.Background()
+// 	bodyBytes, _ := ioutil.ReadAll(r.Body)
+// 	form := formRequest{}
+// 	json.Unmarshal(bodyBytes, &form)
+// 	model := form.Isvctype
