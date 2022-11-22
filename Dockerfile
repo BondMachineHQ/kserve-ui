@@ -1,8 +1,5 @@
 FROM golang:1.19.3-buster as BUILD
 
-RUN apt update \
-&& apt install -y git
-
 COPY . /kserve
 WORKDIR /kserve
 #RUN GOOS=darwin GOARCH=arm64 go build -mod vendor -o main ./main.go
