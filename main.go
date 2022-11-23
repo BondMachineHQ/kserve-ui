@@ -3,10 +3,12 @@ package main
 import (
 	"embed"
 	"encoding/json"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"context"
 
@@ -273,20 +275,22 @@ func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Contex
 	return "{\"message\":\"Successfully submitted\"}", err
 }
 
-// func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, model string) (err error, resp *http.Request) {
-// 	data := predictionArgs{
-// 		Input: Input{
-// 			Name:     "input_1",
-// 			Shape:    []int{1, 4},
-// 			Datatype: "FP32",
-// 			Data:     []float32{0.39886742, 0.76609776, -0.39003127, -0.58781728},
-// 		},
-// 	}
-// 	jsonData, err := json.Marshal(data)
-// 	resp, err = http.NewRequest("POST", "http//131.154.96.201:31080/v1/models/"+model+":predict", strings.NewReader(string(jsonData)))
+func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, model string) (error, string) {
+	data := predictionArgs{
+		Input: Input{
+			Name:     "input_1",
+			Shape:    []int{1, 4},
+			Datatype: "FP32",
+			Data:     []float32{0.39886742, 0.76609776, -0.39003127, -0.58781728},
+		},
+	}
 
-// 	return
-// }
+	jsonData, _ := json.Marshal(data)
+	resp, _ := http.NewRequest("POST", "http//131.154.96.201:31080/v1/models/"+model+":predict", strings.NewReader(string(jsonData)))
+	ret, err := io.ReadAll(resp.Body)
+
+	return err, string(ret)
+}
 
 func main() {
 	config, err := rest.InClusterConfig()
@@ -358,9 +362,8 @@ func delete_isvc_handler(w http.ResponseWriter, r *http.Request) {
 // 	form := formRequest{}
 // 	json.Unmarshal(bodyBytes, &form)
 // 	model := form.Isvctype
-// func predict_handler(w http.ResponseWriter, r *http.Request) {
-// 	ctx := context.Background()
-// 	bodyBytes, _ := ioutil.ReadAll(r.Body)
-// 	form := formRequest{}
-// 	json.Unmarshal(bodyBytes, &form)
-// 	model := form.Isvctype
+//	resp, err := predict(kserve_client, ctx, namespace, model)
+//	if err != nil
+//		log.Println(err)
+//	w.Write(byte[](resp))
+//}
