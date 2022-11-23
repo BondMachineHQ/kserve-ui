@@ -275,7 +275,7 @@ func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Contex
 	return "{\"message\":\"Successfully submitted\"}", err
 }
 
-func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, model string) (error, string) {
+func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, model string) (string, error) {
 	data := predictionArgs{
 		Input: Input{
 			Name:     "input_1",
@@ -289,7 +289,7 @@ func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, n
 	resp, _ := http.NewRequest("POST", "http//131.154.96.201:31080/v1/models/"+model+":predict", strings.NewReader(string(jsonData)))
 	ret, err := io.ReadAll(resp.Body)
 
-	return err, string(ret)
+	return string(ret), err
 }
 
 func main() {
@@ -310,7 +310,7 @@ func main() {
 	mutex.HandleFunc("/list_isvc", list_isvc_handler)
 	mutex.HandleFunc("/create_isvc", create_isvc_handler)
 	mutex.HandleFunc("/delete_isvc", delete_isvc_handler)
-	//mutex.HandleFunc("/preedict", predict_handler)
+	mutex.HandleFunc("/preedict", predict_handler)
 	err = http.ListenAndServe(":3000", mutex)
 	if err != nil {
 		log.Fatal(err)
@@ -356,14 +356,17 @@ func delete_isvc_handler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(out))
 }
 
-// func predict_handler(w http.ResponseWriter, r *http.Request) {
-// 	ctx := context.Background()
-// 	bodyBytes, _ := ioutil.ReadAll(r.Body)
-// 	form := formRequest{}
-// 	json.Unmarshal(bodyBytes, &form)
-// 	model := form.Isvctype
-//	resp, err := predict(kserve_client, ctx, namespace, model)
-//	if err != nil
-//		log.Println(err)
-//	w.Write(byte[](resp))
-//}
+func predict_handler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
+	form := formRequest{}
+	json.Unmarshal(bodyBytes, &form)
+	model := form.Isvctype
+	resp, err := predict(kserve_client, ctx, namespace, model)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	w.Write([]byte(resp))
+}
