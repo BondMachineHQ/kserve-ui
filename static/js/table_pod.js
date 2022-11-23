@@ -11,7 +11,7 @@ var table = $('#example').DataTable({
         defaultContent: "<i>Not available</i>"
       },
       { data: 'name'},
-      { data: 'status.url',
+      { data: 'url',
         defaultContent: "<i>Not available yet</i>",
         render: function ( data, type, row) {
           if (typeof data !== 'undefined') {

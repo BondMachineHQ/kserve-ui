@@ -36,6 +36,7 @@ type PredictorStruct struct {
 	ModelName       string `json:"modelName"`
 	ProtocolVersion string `json:"protocolVersion"`
 	StorageUri      string `json:"storageUri"`
+	Url             string `json:"url"`
 }
 
 type predictionArgs struct {
@@ -236,6 +237,7 @@ func list_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context,
 				ProtocolVersion: "v1",
 				StorageUri:      isvc_list.Items[i].Spec.Predictor.PodSpec.Containers[0].Image,
 				Name:            isvc_list.Items[i].ObjectMeta.Name,
+				Url:             isvc_list.Items[i].Status.URL.String(),
 			}
 		} else {
 			isvc_list_new[i] = PredictorStruct{
@@ -243,6 +245,7 @@ func list_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context,
 				ProtocolVersion: string(*isvc_list.Items[i].Spec.Predictor.Model.ProtocolVersion),
 				StorageUri:      *isvc_list.Items[i].Spec.Predictor.Model.StorageURI,
 				Name:            isvc_list.Items[i].ObjectMeta.Name,
+				Url:             isvc_list.Items[i].Status.URL.String(),
 			}
 		}
 	}
