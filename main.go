@@ -28,6 +28,7 @@ var namespace string = "default"
 type Items struct {
 	Items []PredictorStruct
 }
+
 type PredictorStruct struct {
 	Name            string `json:"name"`
 	ModelName       string `json:"modelName"`
@@ -202,6 +203,7 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 					PodSpec: kserveapi.PodSpec{
 						Containers: []v1.Container{
 							v1.Container{
+								//storageURI must be an argument in the Args var
 								Name:  "kserve-container",
 								Image: "ghcr.io/bondmachinehq/bond-server:v0.0.1-pre1",
 								Resources: v1.ResourceRequirements{
@@ -223,18 +225,25 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 
 func list_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string) ([]byte, error) {
 	isvc_list, err := client.InferenceServices(namespace).List(ctx, metav1.ListOptions{})
-
 	isvc_list_new := make([]PredictorStruct, len(isvc_list.Items))
 
 	for i := 0; i < len(isvc_list.Items); i++ {
-		isvc_list_new[i] = PredictorStruct{
-			ModelName:       isvc_list.Items[i].Spec.Predictor.Model.ModelFormat.Name,
-			ProtocolVersion: string(*isvc_list.Items[i].Spec.Predictor.Model.ProtocolVersion),
-			StorageUri:      *isvc_list.Items[i].Spec.Predictor.Model.StorageURI,
-			Name:            isvc_list.Items[i].ObjectMeta.Name,
+		if isvc_list.Items[i].Spec.Predictor.PodSpec.Containers != nil {
+			isvc_list_new[i] = PredictorStruct{
+				ModelName:       "fpga-model",
+				ProtocolVersion: "v1",
+				StorageUri:      isvc_list.Items[i].Spec.Predictor.PodSpec.Containers[0].Image,
+				Name:            isvc_list.Items[i].ObjectMeta.Name,
+			}
+		} else {
+			isvc_list_new[i] = PredictorStruct{
+				ModelName:       isvc_list.Items[i].Spec.Predictor.Model.ModelFormat.Name,
+				ProtocolVersion: string(*isvc_list.Items[i].Spec.Predictor.Model.ProtocolVersion),
+				StorageUri:      *isvc_list.Items[i].Spec.Predictor.Model.StorageURI,
+				Name:            isvc_list.Items[i].ObjectMeta.Name,
+			}
 		}
 	}
-
 	items := Items{
 		Items: isvc_list_new,
 	}
