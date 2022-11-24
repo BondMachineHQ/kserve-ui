@@ -208,7 +208,11 @@ func createSvcStruct(isvcModel string, name string, uri string, namespace string
 							v1.Container{
 								//storageURI must be an argument in the Args var
 								Name:  "kserve-container",
-								Image: "ghcr.io/bondmachinehq/bond-server:v0.0.1-pre1",
+								Image: "ghcr.io/bondmachinehq/bond-server:v0.0.1-pre2",
+								Args: []string{
+									name,
+									uri,
+								},
 								Resources: v1.ResourceRequirements{
 									Requests: v1.ResourceList{
 										v1.ResourceCPU:    resource.MustParse("1"),
