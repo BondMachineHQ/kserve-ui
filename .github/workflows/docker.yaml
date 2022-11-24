@@ -35,4 +35,4 @@ jobs:
           tags: |
             ghcr.io/${{ steps.get_repo_owner.outputs.repo_owner }}/kserve-ui:${{ env.RELEASE_VERSION }}
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
