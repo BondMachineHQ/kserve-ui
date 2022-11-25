@@ -44,10 +44,10 @@ type predictionArgs struct {
 }
 
 type Input struct {
-	Name     string    `json:"name"`
-	Shape    []int     `json:"shape"`
-	Datatype string    `json:"datatype"`
-	Data     []float32 `json:"data"`
+	Name     string      `json:"name"`
+	Shape    []int       `json:"shape"`
+	Datatype string      `json:"datatype"`
+	Data     [][]float32 `json:"data"`
 }
 
 type formRequest struct {
@@ -288,7 +288,7 @@ func predict(ctx context.Context, model string) error {
 			Name:     "input_1",
 			Shape:    []int{2, 4},
 			Datatype: "FP32",
-			Data:     []float32{0.39886742, 0.76609776, -0.39003127, -0.58781728},
+			Data:     [][]float32{{6.8, 2.8, 4.8, 1.4}, {6.0, 3.4, 4.5, 1.6}},
 		},
 	}
 
