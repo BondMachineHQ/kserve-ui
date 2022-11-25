@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -40,7 +41,7 @@ type PredictorStruct struct {
 }
 
 type predictionArgs struct {
-	Input Input `json:"input"`
+	Inputs []Input `json:"inputs"`
 }
 
 type Input struct {
@@ -282,13 +283,15 @@ func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Contex
 	return "{\"message\":\"Successfully submitted\"}", err
 }
 
-func predict(ctx context.Context, model string) error {
+func predict(ctx context.Context, model string) (string, error) {
 	data := predictionArgs{
-		Input: Input{
-			Name:     "input_1",
-			Shape:    []int{2, 4},
-			Datatype: "FP32",
-			Data:     [][]float32{{6.8, 2.8, 4.8, 1.4}, {6.0, 3.4, 4.5, 1.6}},
+		Inputs: []Input{
+			Input{
+				Name:     "input_1",
+				Shape:    []int{2, 4},
+				Datatype: "FP32",
+				Data:     [][]float32{{6.8, 2.8, 4.8, 1.4}, {6.0, 3.4, 4.5, 1.6}},
+			},
 		},
 	}
 
@@ -296,12 +299,12 @@ func predict(ctx context.Context, model string) error {
 	client := &http.Client{}
 	req, _ := http.NewRequest("POST", "http://131.154.96.201:31080/v2/models/test/infer", strings.NewReader(string(jsonData)))
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Host", "test.default.example.com")
+	req.Host = "test.default.example.com"
 	ret, err := client.Do(req)
-	//ret, err = io.ReadAll(ret.Body)
+	resp, err := io.ReadAll(ret.Body)
 	fmt.Println(ret)
 
-	return err
+	return string(resp), err
 }
 
 func main() {
@@ -374,11 +377,11 @@ func predict_handler(w http.ResponseWriter, r *http.Request) {
 	form := formRequest{}
 	json.Unmarshal(bodyBytes, &form)
 	model := form.Isvctype
-	err := predict(ctx, model)
+	resp, err := predict(ctx, model)
 
 	if err != nil {
 		log.Println(err)
 	}
 
-	//w.Write([]byte(resp))
+	w.Write([]byte(resp))
 }
