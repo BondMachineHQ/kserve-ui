@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 	"encoding/json"
-	"io"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"log"
@@ -282,21 +282,26 @@ func create_isvc(client *servingv1beta1.ServingV1beta1Client, ctx context.Contex
 	return "{\"message\":\"Successfully submitted\"}", err
 }
 
-func predict(client *servingv1beta1.ServingV1beta1Client, ctx context.Context, namespace string, model string) (string, error) {
+func predict(ctx context.Context, model string) error {
 	data := predictionArgs{
 		Input: Input{
 			Name:     "input_1",
-			Shape:    []int{1, 4},
+			Shape:    []int{2, 4},
 			Datatype: "FP32",
 			Data:     []float32{0.39886742, 0.76609776, -0.39003127, -0.58781728},
 		},
 	}
 
 	jsonData, _ := json.Marshal(data)
-	resp, _ := http.NewRequest("POST", "http//131.154.96.201:31080/v1/models/"+model+":predict", strings.NewReader(string(jsonData)))
-	ret, err := io.ReadAll(resp.Body)
+	client := &http.Client{}
+	req, _ := http.NewRequest("POST", "http://131.154.96.201:31080/v2/models/test/infer", strings.NewReader(string(jsonData)))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Host", "test.default.example.com")
+	ret, err := client.Do(req)
+	//ret, err = io.ReadAll(ret.Body)
+	fmt.Println(ret)
 
-	return string(ret), err
+	return err
 }
 
 func main() {
@@ -369,11 +374,11 @@ func predict_handler(w http.ResponseWriter, r *http.Request) {
 	form := formRequest{}
 	json.Unmarshal(bodyBytes, &form)
 	model := form.Isvctype
-	resp, err := predict(kserve_client, ctx, namespace, model)
+	err := predict(ctx, model)
 
 	if err != nil {
 		log.Println(err)
 	}
 
-	w.Write([]byte(resp))
+	//w.Write([]byte(resp))
 }
